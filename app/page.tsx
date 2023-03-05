@@ -1,91 +1,61 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from './page.module.css'
+"use client";
 
-const inter = Inter({ subsets: ['latin'] })
+import { Location } from "@/interfaces/location";
+import { Weather } from "@/interfaces/weather";
+import { getWeatherInfo } from "@/lib/weather";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import DayForecastCard from "./DayForecastCard";
+import HourForecastCard from "./HourForecastCard";
+import TitleSection from "./TitleSection";
 
-export default function Home() {
+const Home = () => {
+  const [location, setLocation] = useState<Location>();
+  const [weatherInfo, setWeatherInfo] = useState<Weather>();
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        setLocation({
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+        });
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (location?.lat && location?.lon) {
+      getWeatherInfo(location).then((weather) => {
+        setWeatherInfo(weather);
+      });
+    }
+  }, [location]);
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className="shadow-lg border max-w-sm mx-auto bg-white rounded-lg px-3">
+      {weatherInfo ? (
+        <>
+          <TitleSection currentWeather={weatherInfo} />
+          <hr className="border-gray-200" />
+          <div className="flex overflow-x-scroll">
+            {weatherInfo.hourly.map((hour) => (
+              <HourForecastCard key={hour.dt} hour={hour} />
+            ))}
+          </div>
+          <hr className="border-gray-200" />
+          <div className="grid grid-cols-2">
+            {weatherInfo.daily.map((day) => (
+              <DayForecastCard key={day.dt} day={day} />
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="text-center py-16">
+          <h1 className="text-xl font-bold">Loading...</h1>
         </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-        <div className={styles.thirteen}>
-          <Image src="/thirteen.svg" alt="13" width={40} height={31} priority />
-        </div>
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://beta.nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      )}
     </main>
-  )
-}
+  );
+};
+export default Home;
