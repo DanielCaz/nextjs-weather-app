@@ -3,9 +3,10 @@ import Image from "next/image";
 
 interface TitleSectionProps {
   currentWeather: Weather;
+  city: string;
 }
 
-const TitleSection = ({ currentWeather }: TitleSectionProps) => {
+const TitleSection = ({ currentWeather, city }: TitleSectionProps) => {
   return (
     <div className="text-center py-8">
       <Image
@@ -15,7 +16,7 @@ const TitleSection = ({ currentWeather }: TitleSectionProps) => {
         width={50}
         height={50}
       />
-      <h1 className="text-xl font-bold uppercase">{currentWeather.timezone}</h1>
+      <h1 className="text-xl font-bold uppercase">{city}</h1>
       <h2 className="text-3xl">{Math.round(currentWeather.current.temp)}°C</h2>
       <h3 className="text-l space-x-3 my-3">
         <span>&or;{Math.floor(currentWeather.daily[0].temp.min)}°C</span>
