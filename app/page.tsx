@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import DayForecastCard from "./DayForecastCard";
 import HourForecastCard from "./HourForecastCard";
 import TitleSection from "./TitleSection";
+import styles from "./Home.module.css";
 
 const Home = () => {
   const [location, setLocation] = useState<Location>();
@@ -26,26 +27,32 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    const fetchData = async (location: Location) => {
+      const weather = await getWeatherInfo(location);
+      setWeatherInfo(weather);
+      const city = await getCity(location);
+      setCity(city);
+    };
+
     if (location?.lat && location?.lon) {
-      getWeatherInfo(location).then((weather) => {
-        setWeatherInfo(weather);
-        getCity(location).then((city) => setCity(city));
-      });
+      fetchData(location);
     }
   }, [location]);
 
   return (
-    <main className="shadow-lg border max-w-sm mx-auto bg-white rounded-lg px-3">
+    <main className="shadow-lg max-w-sm mx-auto rounded-lg px-3 bg-blue-300">
       {weatherInfo ? (
         <>
           <TitleSection currentWeather={weatherInfo} city={city} />
-          <hr className="border-gray-200" />
-          <div className="flex overflow-x-scroll">
+          <hr className="border-blue-200" />
+          <div
+            className={`flex overflow-x-scroll ${styles.hourlyForecastWrapper}`}
+          >
             {weatherInfo.hourly.map((hour) => (
               <HourForecastCard key={hour.dt} hour={hour} />
             ))}
           </div>
-          <hr className="border-gray-200" />
+          <hr className="border-blue-200" />
           <div className="grid grid-cols-2">
             {weatherInfo.daily.map((day) => (
               <DayForecastCard key={day.dt} day={day} />
